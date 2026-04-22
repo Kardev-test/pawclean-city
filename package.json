@@ -1,0 +1,18 @@
+{
+  "name": "pawclean-city-ngo",
+  "version": "1.0.0",
+  "description": "A hostable charity app for stray animal care and city waste management NGOs.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "check": "node --check server.js && node --check script.js"
+  },
+  "keywords": [
+    "ngo",
+    "charity",
+    "donations",
+    "stray-animals",
+    "waste-management"
+  ],
+  "license": "MIT"
+}

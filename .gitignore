@@ -1,0 +1,5 @@
+.env
+data/db.json
+node_modules/
+server.log
+server.err.log

@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PawClean City NGO</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="#home" aria-label="PawClean City home">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" role="img">
+            <path d="M12 3.2c2.2 0 4 1.8 4 4 0 1.1-.4 2.1-1.2 2.8l-2.8 2.9L9.2 10A4 4 0 0 1 12 3.2Zm-7 8.1c1.2-1.1 3.1-.9 4.2.3l2.8 3.2 2.8-3.2a3 3 0 0 1 4.4-.2 3.2 3.2 0 0 1 .2 4.5l-6.1 6.4a1.8 1.8 0 0 1-2.6 0L4.6 16a3.2 3.2 0 0 1 .4-4.7Z" />
+          </svg>
+        </span>
+        <span>PawClean City</span>
+      </a>
+      <nav class="nav" aria-label="Main navigation">
+        <a href="#donate">Donate</a>
+        <a href="#report">Report</a>
+        <a href="#impact">Impact</a>
+        <a href="#volunteer">Volunteer</a>
+      </nav>
+    </header>
+
+    <main id="home">
+      <section class="hero">
+        <img src="assets/hero-community-care.png" alt="Volunteers helping stray dogs and cats near clean waste sorting bins" />
+        <div class="hero-shade"></div>
+        <div class="hero-copy">
+          <p class="eyebrow">Animal care + cleaner streets</p>
+          <h1>PawClean City</h1>
+          <p class="lede">A donation and field-response app for NGOs helping stray dogs, stray cats, and neighborhood waste management teams work from one shared mission board.</p>
+          <div class="hero-actions">
+            <a class="button primary" href="#donate">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.4-4.8-9.5-9.4C1 8.2 3.1 4.8 6.7 4.8c2 0 3.6 1 4.4 2.3.8-1.3 2.4-2.3 4.4-2.3 3.6 0 5.7 3.4 4.2 6.8C19.4 16.2 12 21 12 21Z" /></svg>
+              Donate now
+            </a>
+            <a class="button secondary" href="#report">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8a7.2 7.2 0 0 0-7.2 7.2c0 5.4 7.2 11.2 7.2 11.2s7.2-5.8 7.2-11.2A7.2 7.2 0 0 0 12 2.8Zm0 9.7A2.5 2.5 0 1 1 12 7.5a2.5 2.5 0 0 1 0 5Z" /></svg>
+              Report a case
+            </a>
+          </div>
+        </div>
+        <div class="quick-stats" aria-label="Current impact numbers">
+          <div><strong id="heroFunds">₹0</strong><span>pledged today</span></div>
+          <div><strong id="heroReports">0</strong><span>open reports</span></div>
+          <div><strong>4</strong><span>care programs</span></div>
+        </div>
+      </section>
+
+      <section class="mission band">
+        <div class="section-heading">
+          <p class="eyebrow">What the NGO can run</p>
+          <h2>One operating desk for funds, animals, waste, and volunteers.</h2>
+        </div>
+        <div class="mission-grid">
+          <article class="feature">
+            <span class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 20c0-4 3.1-7.2 7-7.2s7 3.2 7 7.2H5Zm7-9a4 4 0 1 1 0-8 4 4 0 0 1 0 8Z"/></svg></span>
+            <h3>Rescue and feeding</h3>
+            <p>Log urgent cases, schedule feeding routes, and mark animal-care needs by ward.</p>
+          </article>
+          <article class="feature">
+            <span class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 21a2 2 0 0 1-2-2V8h14v11a2 2 0 0 1-2 2H7ZM8 5V3h8v2h4v2H4V5h4Zm2 5v8h2v-8h-2Zm4 0v8h2v-8h-2Z"/></svg></span>
+            <h3>Waste pickup</h3>
+            <p>Collect dirty-spot reports and triage wet waste, dry waste, recyclables, and medical-risk trash.</p>
+          </article>
+          <article class="feature">
+            <span class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 0 1 14.9-4H16V5h6v6h-3V8.8A5.6 5.6 0 1 0 17.6 16l2 1.7A8 8 0 0 1 4 12Z"/></svg></span>
+            <h3>Transparent funding</h3>
+            <p>Show donors how each rupee is split between food, sterilization, cleanup, rescue, and admin.</p>
+          </article>
+          <article class="feature">
+            <span class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 12.2A4.1 4.1 0 1 0 12 4a4.1 4.1 0 0 0 0 8.2ZM3.8 21c.8-4.1 4-6.8 8.2-6.8s7.4 2.7 8.2 6.8H3.8Z"/></svg></span>
+            <h3>Volunteer shifts</h3>
+            <p>Capture helpers for rescue transport, cleanup drives, adoption camps, and feeding routes.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="donate" class="workspace">
+        <div class="section-heading">
+          <p class="eyebrow">Donation desk</p>
+          <h2>Receive pledges and show instant impact.</h2>
+        </div>
+        <div class="tool-layout">
+          <form class="panel form-panel" id="donationForm">
+            <label>
+              Donor name
+              <input id="donorName" name="donorName" type="text" placeholder="Your name" required />
+            </label>
+            <label>
+              Phone or email
+              <input id="donorContact" name="donorContact" type="text" placeholder="Optional receipt contact" />
+            </label>
+            <div class="amount-row" aria-label="Suggested donation amounts">
+              <button type="button" data-amount="250">₹250</button>
+              <button type="button" data-amount="500" class="selected">₹500</button>
+              <button type="button" data-amount="1000">₹1,000</button>
+              <button type="button" data-amount="2500">₹2,500</button>
+            </div>
+            <label>
+              Custom amount
+              <input id="donationAmount" name="donationAmount" type="number" min="50" step="50" value="500" required />
+            </label>
+            <label>
+              Program
+              <select id="program" name="program">
+                <option value="stray-food">Stray dog and cat feeding</option>
+                <option value="medical">Rescue, vaccination, and sterilization</option>
+                <option value="clean-city">Waste pickup and city cleanliness</option>
+                <option value="general">Where it is needed most</option>
+              </select>
+            </label>
+            <button class="button primary full" type="submit">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 3 6v6c0 5 3.8 8.8 9 10 5.2-1.2 9-5 9-10V6l-9-4Zm-1 14-3.3-3.3 1.4-1.4 1.9 1.9 4.9-4.9 1.4 1.4L11 16Z"/></svg>
+              Continue to donation
+            </button>
+            <p class="form-note">Start the Node server to save data centrally. Add Razorpay keys to collect real online payments.</p>
+          </form>
+
+          <aside class="panel impact-card">
+            <div class="impact-top">
+              <span>Estimated use</span>
+              <strong id="impactAmount">₹500</strong>
+            </div>
+            <div class="allocation">
+              <div><span style="--w: 40%"></span><b>Food and water</b><em id="foodValue">₹200</em></div>
+              <div><span style="--w: 25%"></span><b>Medical care</b><em id="medicalValue">₹125</em></div>
+              <div><span style="--w: 25%"></span><b>Cleanup drives</b><em id="cleanValue">₹125</em></div>
+              <div><span style="--w: 10%"></span><b>Admin and transport</b><em id="adminValue">₹50</em></div>
+            </div>
+            <div class="receipt" id="receiptBox">
+              <h3>Ready for a pledge</h3>
+              <p>Choose an amount and program to preview how the NGO can allocate funds.</p>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section id="report" class="band">
+        <div class="section-heading">
+          <p class="eyebrow">Field reports</p>
+          <h2>Citizens can report animal cases or waste hotspots.</h2>
+        </div>
+        <div class="tool-layout">
+          <form class="panel form-panel" id="reportForm">
+            <label>
+              Report type
+              <select id="reportType" required>
+                <option value="Stray animal care">Stray animal care</option>
+                <option value="Waste hotspot">Waste hotspot</option>
+                <option value="Feeding point">Feeding point</option>
+                <option value="Adoption lead">Adoption lead</option>
+              </select>
+            </label>
+            <label>
+              Location
+              <input id="reportLocation" type="text" placeholder="Area, ward, landmark" required />
+            </label>
+            <label>
+              Urgency
+              <select id="reportUrgency">
+                <option>Normal</option>
+                <option>High</option>
+                <option>Emergency</option>
+              </select>
+            </label>
+            <label>
+              Notes
+              <textarea id="reportNotes" rows="4" placeholder="Describe the animal, cleanup need, or pickup details"></textarea>
+            </label>
+            <button class="button primary full" type="submit">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8a7.2 7.2 0 0 0-7.2 7.2c0 5.4 7.2 11.2 7.2 11.2s7.2-5.8 7.2-11.2A7.2 7.2 0 0 0 12 2.8Zm0 9.7A2.5 2.5 0 1 1 12 7.5a2.5 2.5 0 0 1 0 5Z"/></svg>
+              Submit report
+            </button>
+          </form>
+          <div class="panel">
+            <div class="list-head">
+              <h3>Mission board</h3>
+              <button class="icon-button" id="clearReports" type="button" title="Clear local reports" aria-label="Clear local reports">
+                <svg viewBox="0 0 24 24"><path d="M7 21a2 2 0 0 1-2-2V8h14v11a2 2 0 0 1-2 2H7ZM8 5V3h8v2h4v2H4V5h4Z"/></svg>
+              </button>
+            </div>
+            <div class="report-list" id="reportList"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="impact" class="impact-section">
+        <div class="section-heading">
+          <p class="eyebrow">Impact tracker</p>
+          <h2>Make the NGO’s work easy to understand.</h2>
+        </div>
+        <div class="metric-grid">
+          <div class="metric"><span id="totalFunds">₹0</span><p>Total local pledges</p></div>
+          <div class="metric"><span id="totalMeals">0</span><p>Animal meals estimated</p></div>
+          <div class="metric"><span id="totalCleanups">0</span><p>Cleanup kits funded</p></div>
+          <div class="metric"><span id="totalCare">0</span><p>Medical-care shares</p></div>
+        </div>
+      </section>
+
+      <section id="volunteer" class="band volunteer">
+        <div class="section-heading">
+          <p class="eyebrow">Volunteer desk</p>
+          <h2>Collect help for field teams.</h2>
+        </div>
+        <form class="panel volunteer-form" id="volunteerForm">
+          <label>
+            Name
+            <input id="volunteerName" type="text" placeholder="Volunteer name" required />
+          </label>
+          <label>
+            Area
+            <input id="volunteerArea" type="text" placeholder="Preferred area" required />
+          </label>
+          <label>
+            Skill
+            <select id="volunteerSkill">
+              <option>Feeding route</option>
+              <option>Animal transport</option>
+              <option>Cleanup drive</option>
+              <option>Adoption event</option>
+            </select>
+          </label>
+          <button class="button primary" type="submit">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12.2A4.1 4.1 0 1 0 12 4a4.1 4.1 0 0 0 0 8.2ZM3.8 21c.8-4.1 4-6.8 8.2-6.8s7.4 2.7 8.2 6.8H3.8Z"/></svg>
+            Join
+          </button>
+        </form>
+        <div class="volunteer-list" id="volunteerList"></div>
+      </section>
+    </main>
+
+    <footer>
+      <strong>PawClean City NGO</strong>
+      <span>Built for stray animal care, clean streets, transparent donations, and citizen action.</span>
+    </footer>
+
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
