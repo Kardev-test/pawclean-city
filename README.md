@@ -18,6 +18,7 @@ Copy `.env.example` to `.env` and add real Razorpay credentials:
 
 ```bash
 PORT=3000
+DATA_DIR=./data
 RAZORPAY_KEY_ID=rzp_live_your_key_id
 RAZORPAY_KEY_SECRET=your_key_secret
 ```
@@ -29,6 +30,8 @@ Do not collect card, bank, UPI PIN, or wallet credentials directly in this app. 
 ## Hosting
 
 For public launch, host this as a Node app on Render, Railway, Fly.io, DigitalOcean, or another server that can run `npm start`. Static-only hosting such as GitHub Pages will show the UI, but it will not provide the database or payment verification backend.
+
+On Render, add a persistent disk and set `DATA_DIR=/var/data` so donation/report/volunteer records survive redeploys.
 
 ## Files
 

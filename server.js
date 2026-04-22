@@ -5,7 +5,7 @@ const path = require("path");
 const crypto = require("crypto");
 
 const ROOT = __dirname;
-const DATA_DIR = path.join(ROOT, "data");
+const DATA_DIR = process.env.DATA_DIR || path.join(ROOT, "data");
 const DB_FILE = path.join(DATA_DIR, "db.json");
 
 loadEnv();
