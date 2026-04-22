@@ -5,12 +5,13 @@ const path = require("path");
 const crypto = require("crypto");
 
 const ROOT = __dirname;
-const DATA_DIR = process.env.DATA_DIR || path.join(ROOT, "data");
-const DB_FILE = path.join(DATA_DIR, "db.json");
 
 loadEnv();
 
 const PORT = Number(process.env.PORT || 3000);
+const DEFAULT_DATA_DIR = path.join(ROOT, "data");
+let activeDataDir = process.env.DATA_DIR || DEFAULT_DATA_DIR;
+let dbFile = path.join(activeDataDir, "db.json");
 
 const contentTypes = {
   ".html": "text/html; charset=utf-8",
@@ -30,22 +31,34 @@ const emptyDb = {
 };
 
 async function ensureDb() {
-  await fs.mkdir(DATA_DIR, { recursive: true });
   try {
-    await fs.access(DB_FILE);
+    await fs.mkdir(activeDataDir, { recursive: true });
+  } catch (error) {
+    if (process.env.DATA_DIR && activeDataDir !== DEFAULT_DATA_DIR) {
+      console.warn(`DATA_DIR "${activeDataDir}" is not writable. Falling back to "${DEFAULT_DATA_DIR}".`);
+      activeDataDir = DEFAULT_DATA_DIR;
+      dbFile = path.join(activeDataDir, "db.json");
+      await fs.mkdir(activeDataDir, { recursive: true });
+    } else {
+      throw error;
+    }
+  }
+
+  try {
+    await fs.access(dbFile);
   } catch {
-    await fs.writeFile(DB_FILE, JSON.stringify(emptyDb, null, 2));
+    await fs.writeFile(dbFile, JSON.stringify(emptyDb, null, 2));
   }
 }
 
 async function readDb() {
   await ensureDb();
-  const raw = await fs.readFile(DB_FILE, "utf8");
+  const raw = await fs.readFile(dbFile, "utf8");
   return { ...emptyDb, ...JSON.parse(raw) };
 }
 
 async function writeDb(db) {
-  await fs.writeFile(DB_FILE, JSON.stringify(db, null, 2));
+  await fs.writeFile(dbFile, JSON.stringify(db, null, 2));
 }
 
 function sendJson(res, status, data) {
@@ -311,5 +324,6 @@ const server = http.createServer(async (req, res) => {
 ensureDb().then(() => {
   server.listen(PORT, () => {
     console.log(`PawClean City running at http://localhost:${PORT}`);
+    console.log(`Data directory: ${activeDataDir}`);
   });
 });

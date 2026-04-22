@@ -31,7 +31,7 @@ Do not collect card, bank, UPI PIN, or wallet credentials directly in this app. 
 
 For public launch, host this as a Node app on Render, Railway, Fly.io, DigitalOcean, or another server that can run `npm start`. Static-only hosting such as GitHub Pages will show the UI, but it will not provide the database or payment verification backend.
 
-On Render, add a persistent disk and set `DATA_DIR=/var/data` so donation/report/volunteer records survive redeploys.
+On Render, add a persistent disk and set `DATA_DIR=/var/data` so donation/report/volunteer records survive redeploys. If you do not add the disk yet, remove `DATA_DIR` from Render and the app will still run, but records can disappear after redeploys.
 
 ## Files
 
