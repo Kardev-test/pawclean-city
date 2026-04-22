@@ -3,6 +3,7 @@ const fs = require("fs/promises");
 const fsSync = require("fs");
 const path = require("path");
 const crypto = require("crypto");
+const { Pool } = require("pg");
 
 const ROOT = __dirname;
 
@@ -12,6 +13,7 @@ const PORT = Number(process.env.PORT || 3000);
 const DEFAULT_DATA_DIR = path.join(ROOT, "data");
 let activeDataDir = process.env.DATA_DIR || DEFAULT_DATA_DIR;
 let dbFile = path.join(activeDataDir, "db.json");
+let pool = null;
 
 const contentTypes = {
   ".html": "text/html; charset=utf-8",
@@ -30,7 +32,7 @@ const emptyDb = {
   volunteers: [],
 };
 
-async function ensureDb() {
+async function ensureJsonDb() {
   try {
     await fs.mkdir(activeDataDir, { recursive: true });
   } catch (error) {
@@ -51,14 +53,209 @@ async function ensureDb() {
   }
 }
 
-async function readDb() {
-  await ensureDb();
+async function readJsonDb() {
+  await ensureJsonDb();
   const raw = await fs.readFile(dbFile, "utf8");
   return { ...emptyDb, ...JSON.parse(raw) };
 }
 
-async function writeDb(db) {
+async function writeJsonDb(db) {
   await fs.writeFile(dbFile, JSON.stringify(db, null, 2));
+}
+
+async function initDb() {
+  if (!process.env.DATABASE_URL) {
+    await ensureJsonDb();
+    return "json";
+  }
+
+  pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: process.env.DATABASE_SSL === "true" ? { rejectUnauthorized: false } : undefined,
+  });
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS donations (
+      id TEXT PRIMARY KEY,
+      donor TEXT NOT NULL,
+      amount INTEGER NOT NULL,
+      program TEXT NOT NULL,
+      contact TEXT DEFAULT '',
+      status TEXT NOT NULL DEFAULT 'pledged',
+      payment_order_id TEXT,
+      payment_id TEXT,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      paid_at TIMESTAMPTZ
+    );
+
+    CREATE TABLE IF NOT EXISTS reports (
+      id TEXT PRIMARY KEY,
+      type TEXT NOT NULL,
+      location TEXT NOT NULL,
+      urgency TEXT NOT NULL DEFAULT 'Normal',
+      notes TEXT DEFAULT '',
+      status TEXT NOT NULL DEFAULT 'open',
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS volunteers (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      area TEXT NOT NULL,
+      skill TEXT NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+
+  return "postgres";
+}
+
+async function readDb() {
+  if (!pool) return readJsonDb();
+
+  const [donations, reports, volunteers] = await Promise.all([
+    pool.query(`
+      SELECT
+        id, donor, amount, program, contact, status,
+        payment_order_id AS "paymentOrderId",
+        payment_id AS "paymentId",
+        created_at AS "createdAt",
+        paid_at AS "paidAt"
+      FROM donations
+      ORDER BY created_at DESC
+    `),
+    pool.query(`
+      SELECT id, type, location, urgency, notes, status, created_at AS "createdAt"
+      FROM reports
+      ORDER BY created_at DESC
+    `),
+    pool.query(`
+      SELECT id, name, area, skill, created_at AS "createdAt"
+      FROM volunteers
+      ORDER BY created_at DESC
+    `),
+  ]);
+
+  return {
+    donations: donations.rows,
+    reports: reports.rows,
+    volunteers: volunteers.rows,
+  };
+}
+
+async function saveDonation(donation) {
+  if (!pool) {
+    const db = await readJsonDb();
+    db.donations.unshift(donation);
+    await writeJsonDb(db);
+    return donation;
+  }
+
+  const result = await pool.query(
+    `
+      INSERT INTO donations (
+        id, donor, amount, program, contact, status, payment_order_id, payment_id, created_at, paid_at
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+      RETURNING
+        id, donor, amount, program, contact, status,
+        payment_order_id AS "paymentOrderId",
+        payment_id AS "paymentId",
+        created_at AS "createdAt",
+        paid_at AS "paidAt"
+    `,
+    [
+      donation.id,
+      donation.donor,
+      donation.amount,
+      donation.program,
+      donation.contact,
+      donation.status,
+      donation.paymentOrderId || null,
+      donation.paymentId || null,
+      donation.createdAt,
+      donation.paidAt || null,
+    ],
+  );
+  return result.rows[0];
+}
+
+async function saveReport(report) {
+  if (!pool) {
+    const db = await readJsonDb();
+    db.reports.unshift(report);
+    await writeJsonDb(db);
+    return report;
+  }
+
+  const result = await pool.query(
+    `
+      INSERT INTO reports (id, type, location, urgency, notes, status, created_at)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      RETURNING id, type, location, urgency, notes, status, created_at AS "createdAt"
+    `,
+    [report.id, report.type, report.location, report.urgency, report.notes, report.status, report.createdAt],
+  );
+  return result.rows[0];
+}
+
+async function saveVolunteer(volunteer) {
+  if (!pool) {
+    const db = await readJsonDb();
+    db.volunteers.unshift(volunteer);
+    await writeJsonDb(db);
+    return volunteer;
+  }
+
+  const result = await pool.query(
+    `
+      INSERT INTO volunteers (id, name, area, skill, created_at)
+      VALUES ($1, $2, $3, $4, $5)
+      RETURNING id, name, area, skill, created_at AS "createdAt"
+    `,
+    [volunteer.id, volunteer.name, volunteer.area, volunteer.skill, volunteer.createdAt],
+  );
+  return result.rows[0];
+}
+
+async function clearReports() {
+  if (!pool) {
+    const db = await readJsonDb();
+    db.reports = [];
+    await writeJsonDb(db);
+    return;
+  }
+
+  await pool.query("DELETE FROM reports");
+}
+
+async function markDonationPaidByOrder(orderId, paymentId) {
+  if (!pool) {
+    const db = await readJsonDb();
+    const donation = db.donations.find((item) => item.paymentOrderId === orderId);
+    if (!donation) return null;
+    donation.status = "paid";
+    donation.paymentId = paymentId;
+    donation.paidAt = new Date().toISOString();
+    await writeJsonDb(db);
+    return donation;
+  }
+
+  const result = await pool.query(
+    `
+      UPDATE donations
+      SET status = 'paid', payment_id = $2, paid_at = NOW()
+      WHERE payment_order_id = $1
+      RETURNING
+        id, donor, amount, program, contact, status,
+        payment_order_id AS "paymentOrderId",
+        payment_id AS "paymentId",
+        created_at AS "createdAt",
+        paid_at AS "paidAt"
+    `,
+    [orderId, paymentId],
+  );
+  return result.rows[0] || null;
 }
 
 function sendJson(res, status, data) {
@@ -188,7 +385,6 @@ async function handleApi(req, res, pathname) {
       return sendJson(res, 400, { error: "Please enter a donor name and an amount of at least Rs 50." });
     }
 
-    const db = await readDb();
     const donation = {
       id: newId("don"),
       donor,
@@ -205,9 +401,8 @@ async function handleApi(req, res, pathname) {
       donation.paymentOrderId = payment.orderId;
     }
 
-    db.donations.unshift(donation);
-    await writeDb(db);
-    return sendJson(res, 201, { donation, payment });
+    const savedDonation = await saveDonation(donation);
+    return sendJson(res, 201, { donation: savedDonation, payment });
   }
 
   if (req.method === "POST" && pathname === "/api/reports") {
@@ -226,10 +421,7 @@ async function handleApi(req, res, pathname) {
       return sendJson(res, 400, { error: "Report type and location are required." });
     }
 
-    const db = await readDb();
-    db.reports.unshift(report);
-    await writeDb(db);
-    return sendJson(res, 201, { report });
+    return sendJson(res, 201, { report: await saveReport(report) });
   }
 
   if (req.method === "POST" && pathname === "/api/payments/razorpay/verify") {
@@ -242,23 +434,16 @@ async function handleApi(req, res, pathname) {
       return sendJson(res, 400, { error: "Payment verification failed." });
     }
 
-    const db = await readDb();
-    const donation = db.donations.find((item) => item.paymentOrderId === orderId);
+    const donation = await markDonationPaidByOrder(orderId, paymentId);
     if (!donation) {
       return sendJson(res, 404, { error: "Donation order not found." });
     }
 
-    donation.status = "paid";
-    donation.paymentId = paymentId;
-    donation.paidAt = new Date().toISOString();
-    await writeDb(db);
     return sendJson(res, 200, { donation });
   }
 
   if (req.method === "DELETE" && pathname === "/api/reports") {
-    const db = await readDb();
-    db.reports = [];
-    await writeDb(db);
+    await clearReports();
     return sendJson(res, 200, { ok: true });
   }
 
@@ -276,10 +461,7 @@ async function handleApi(req, res, pathname) {
       return sendJson(res, 400, { error: "Volunteer name, area, and skill are required." });
     }
 
-    const db = await readDb();
-    db.volunteers.unshift(volunteer);
-    await writeDb(db);
-    return sendJson(res, 201, { volunteer });
+    return sendJson(res, 201, { volunteer: await saveVolunteer(volunteer) });
   }
 
   return sendJson(res, 404, { error: "Not found" });
@@ -321,9 +503,9 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
-ensureDb().then(() => {
+initDb().then((mode) => {
   server.listen(PORT, () => {
     console.log(`PawClean City running at http://localhost:${PORT}`);
-    console.log(`Data directory: ${activeDataDir}`);
+    console.log(mode === "postgres" ? "Database: PostgreSQL" : `Data directory: ${activeDataDir}`);
   });
 });

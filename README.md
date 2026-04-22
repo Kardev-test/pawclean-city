@@ -10,7 +10,31 @@ npm start
 
 Then open `http://localhost:3000`.
 
-The Node server stores donations, field reports, and volunteer signups in `data/db.json`. If you open `index.html` directly as a file, the app still works in local-demo mode with browser `localStorage`.
+The Node server stores donations, field reports, and volunteer signups in PostgreSQL when `DATABASE_URL` is configured. Without `DATABASE_URL`, it falls back to `data/db.json`. If you open `index.html` directly as a file, the app still works in local-demo mode with browser `localStorage`.
+
+## PostgreSQL Setup
+
+Create a database in your local PostgreSQL installation:
+
+```sql
+CREATE DATABASE pawclean_city;
+```
+
+Copy `.env.example` to `.env`, then set your local PostgreSQL password:
+
+```bash
+PORT=3000
+DATABASE_URL=postgres://postgres:your_password@localhost:5432/pawclean_city
+DATABASE_SSL=false
+```
+
+Start the app:
+
+```bash
+npm start
+```
+
+The app creates the required tables automatically on startup.
 
 ## Real Payment Setup
 
@@ -19,11 +43,13 @@ Copy `.env.example` to `.env` and add real Razorpay credentials:
 ```bash
 PORT=3000
 DATA_DIR=./data
+DATABASE_URL=postgres://postgres:your_password@localhost:5432/pawclean_city
+DATABASE_SSL=false
 RAZORPAY_KEY_ID=rzp_live_your_key_id
 RAZORPAY_KEY_SECRET=your_key_secret
 ```
 
-With keys configured, the donation form creates a Razorpay order, opens Razorpay Checkout, verifies the payment signature on the server, and marks the donation as paid.
+With Razorpay keys configured, the donation form creates a Razorpay order, opens Razorpay Checkout, verifies the payment signature on the server, and marks the donation as paid. Without Razorpay keys, donations are saved as pledges.
 
 Do not collect card, bank, UPI PIN, or wallet credentials directly in this app. Let Razorpay Checkout handle sensitive payment details.
 
@@ -31,7 +57,9 @@ Do not collect card, bank, UPI PIN, or wallet credentials directly in this app. 
 
 For public launch, host this as a Node app on Render, Railway, Fly.io, DigitalOcean, or another server that can run `npm start`. Static-only hosting such as GitHub Pages will show the UI, but it will not provide the database or payment verification backend.
 
-On Render, add a persistent disk and set `DATA_DIR=/var/data` so donation/report/volunteer records survive redeploys. If you do not add the disk yet, remove `DATA_DIR` from Render and the app will still run, but records can disappear after redeploys.
+On Render, the better production path is a Render PostgreSQL database. Add its `DATABASE_URL` to the web service environment variables and set `DATABASE_SSL=true` if Render gives you an external database URL that requires SSL.
+
+If you are not using PostgreSQL on Render yet, add a persistent disk and set `DATA_DIR=/var/data` so JSON records survive redeploys. If you do not add the disk yet, remove `DATA_DIR` from Render and the app will still run, but records can disappear after redeploys.
 
 ## Files
 
