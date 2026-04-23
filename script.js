@@ -7,7 +7,7 @@ const rupee = new Intl.NumberFormat("en-IN", {
 const api = {
   available: location.protocol !== "file:",
   async get(path) {
-    const response = await fetch(path);
+    const response = await fetch(path, { credentials: "same-origin" });
     if (!response.ok) throw new Error(`Request failed: ${response.status}`);
     return response.json();
   },
@@ -16,15 +16,20 @@ const api = {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
+      credentials: "same-origin",
     });
     const data = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(data.error || `Request failed: ${response.status}`);
     return data;
   },
   async del(path) {
-    const response = await fetch(path, { method: "DELETE" });
-    if (!response.ok) throw new Error(`Request failed: ${response.status}`);
-    return response.json();
+    const response = await fetch(path, {
+      method: "DELETE",
+      credentials: "same-origin",
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || `Request failed: ${response.status}`);
+    return data;
   },
 };
 
@@ -54,6 +59,9 @@ const reportForm = document.querySelector("#reportForm");
 const volunteerForm = document.querySelector("#volunteerForm");
 const reportList = document.querySelector("#reportList");
 const volunteerList = document.querySelector("#volunteerList");
+const recentDonations = document.querySelector("#recentDonations");
+const recentReports = document.querySelector("#recentReports");
+const recentVolunteers = document.querySelector("#recentVolunteers");
 
 function fallbackLoad() {
   state.donations = JSON.parse(localStorage.getItem(storageKeys.donations) || "[]");
@@ -106,13 +114,19 @@ function updateDonationPreview() {
 
 function updateTotals() {
   const total = state.donations.reduce((sum, item) => sum + Number(item.amount || 0), 0);
-  const reportsOpen = state.reports.length;
+  const reportsOpen = state.reports.filter((item) => item.status !== "closed").length;
+  const volunteerCount = state.volunteers.length;
+
   document.querySelector("#heroFunds").textContent = rupee.format(total);
   document.querySelector("#totalFunds").textContent = rupee.format(total);
-  document.querySelector("#heroReports").textContent = reportsOpen;
+  document.querySelector("#heroReports").textContent = String(reportsOpen);
+  document.querySelector("#heroVolunteers").textContent = String(volunteerCount);
   document.querySelector("#totalMeals").textContent = Math.floor((total * 0.4) / 25).toLocaleString("en-IN");
   document.querySelector("#totalCleanups").textContent = Math.floor((total * 0.25) / 150).toLocaleString("en-IN");
   document.querySelector("#totalCare").textContent = Math.floor((total * 0.25) / 500).toLocaleString("en-IN");
+  document.querySelector("#donationCountChip").textContent = `${state.donations.length} entries`;
+  document.querySelector("#reportCountChip").textContent = `${reportsOpen} open`;
+  document.querySelector("#volunteerCountChip").textContent = `${volunteerCount} people`;
 }
 
 function renderReports() {
@@ -122,13 +136,14 @@ function renderReports() {
   }
 
   reportList.innerHTML = state.reports
+    .slice(0, 8)
     .map((report) => {
       const urgencyClass = report.urgency === "Emergency" || report.urgency === "High" ? "high" : "normal";
       return `
         <article class="report-card">
           <header>
             <strong>${escapeHtml(report.type)}</strong>
-            <span class="badge ${urgencyClass}">${escapeHtml(report.urgency)}</span>
+            <span class="badge ${urgencyClass.toLowerCase()}">${escapeHtml(report.urgency)}</span>
           </header>
           <p><b>${escapeHtml(report.location)}</b></p>
           <p>${escapeHtml(report.notes || "No extra notes added.")}</p>
@@ -145,6 +160,7 @@ function renderVolunteers() {
   }
 
   volunteerList.innerHTML = state.volunteers
+    .slice(0, 6)
     .map(
       (person) => `
         <div class="volunteer-pill">
@@ -156,10 +172,65 @@ function renderVolunteers() {
     .join("");
 }
 
+function renderPulse() {
+  recentDonations.innerHTML = renderActivityItems(
+    state.donations.slice(0, 5).map((item) => ({
+      title: item.donor,
+      badge: item.status || "pledged",
+      badgeClass: item.status === "paid" ? "closed" : "normal",
+      primary: `${rupee.format(item.amount)} for ${programNames[item.program] || item.program}`,
+      secondary: formatDate(item.createdAt),
+    })),
+    "No donations yet.",
+  );
+
+  recentReports.innerHTML = renderActivityItems(
+    state.reports.slice(0, 5).map((item) => ({
+      title: item.type,
+      badge: item.urgency,
+      badgeClass: item.urgency.toLowerCase(),
+      primary: item.location,
+      secondary: item.status === "closed" ? "Closed" : "Needs attention",
+    })),
+    "No cases in the queue.",
+  );
+
+  recentVolunteers.innerHTML = renderActivityItems(
+    state.volunteers.slice(0, 5).map((item) => ({
+      title: item.name,
+      badge: "ready",
+      badgeClass: "closed",
+      primary: `${item.skill} in ${item.area}`,
+      secondary: formatDate(item.createdAt),
+    })),
+    "No volunteer signups yet.",
+  );
+}
+
+function renderActivityItems(items, emptyMessage) {
+  if (!items.length) return `<p class="empty">${escapeHtml(emptyMessage)}</p>`;
+
+  return items
+    .map(
+      (item) => `
+        <article class="activity-item">
+          <div class="activity-top">
+            <strong>${escapeHtml(item.title)}</strong>
+            <span class="badge ${escapeHtml(item.badgeClass || "normal")}">${escapeHtml(item.badge)}</span>
+          </div>
+          <p>${escapeHtml(item.primary)}</p>
+          <p class="activity-meta">${escapeHtml(item.secondary)}</p>
+        </article>
+      `,
+    )
+    .join("");
+}
+
 function renderAll() {
   updateDonationPreview();
   renderReports();
   renderVolunteers();
+  renderPulse();
   updateTotals();
 }
 
@@ -176,6 +247,14 @@ function escapeHtml(value) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
+}
+
+function formatDate(value) {
+  if (!value) return "Just now";
+  return new Date(value).toLocaleString("en-IN", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
 }
 
 amountButtons.forEach((button) => {
@@ -219,7 +298,7 @@ donationForm.addEventListener("submit", async (event) => {
         setStatus(
           `<h3>Pledge recorded</h3>
            <p>${escapeHtml(donor)} pledged <b>${rupee.format(amount)}</b> for ${programNames[program]}.</p>
-           <p>Add Razorpay keys on the server to collect real online payments.</p>`,
+           <p>The operations dashboard updates immediately for the NGO team.</p>`,
           "success",
         );
       }
@@ -257,7 +336,7 @@ reportForm.addEventListener("submit", async (event) => {
       const result = await api.post("/api/reports", payload);
       state.reports.unshift(result.report);
     } else {
-      state.reports.unshift({ ...payload, id: `local-${Date.now()}`, createdAt: new Date().toISOString() });
+      state.reports.unshift({ ...payload, id: `local-${Date.now()}`, createdAt: new Date().toISOString(), status: "open" });
       fallbackSave();
     }
     reportForm.reset();
@@ -268,6 +347,9 @@ reportForm.addEventListener("submit", async (event) => {
 });
 
 document.querySelector("#clearReports").addEventListener("click", async () => {
+  const confirmed = window.confirm("Only admins can clear reports from the shared queue. Continue?");
+  if (!confirmed) return;
+
   try {
     if (api.available) {
       await api.del("/api/reports");

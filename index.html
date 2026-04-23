@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>PawClean City NGO</title>
-    <link rel="stylesheet" href="/styles.css?v=20260422a" />
+    <link rel="stylesheet" href="/styles.css?v=20260423a" />
   </head>
   <body>
     <header class="topbar">
@@ -18,9 +18,10 @@
       </a>
       <nav class="nav" aria-label="Main navigation">
         <a href="#donate">Donate</a>
+        <a href="#pulse">City Pulse</a>
         <a href="#report">Report</a>
-        <a href="#impact">Impact</a>
         <a href="#volunteer">Volunteer</a>
+        <a class="nav-admin" href="/admin">Admin</a>
       </nav>
     </header>
 
@@ -44,9 +45,9 @@
           </div>
         </div>
         <div class="quick-stats" aria-label="Current impact numbers">
-          <div><strong id="heroFunds">₹0</strong><span>pledged today</span></div>
+          <div><strong id="heroFunds">Rs 0</strong><span>pledged so far</span></div>
           <div><strong id="heroReports">0</strong><span>open reports</span></div>
-          <div><strong>4</strong><span>care programs</span></div>
+          <div><strong id="heroVolunteers">0</strong><span>active volunteers</span></div>
         </div>
       </section>
 
@@ -79,6 +80,36 @@
         </div>
       </section>
 
+      <section id="pulse" class="workspace pulse-section">
+        <div class="section-heading">
+          <p class="eyebrow">Live city pulse</p>
+          <h2>See the mission moving in real time.</h2>
+        </div>
+        <div class="pulse-grid">
+          <article class="panel pulse-card">
+            <div class="panel-head">
+              <h3>Recent donations</h3>
+              <span id="donationCountChip" class="stat-chip">0 entries</span>
+            </div>
+            <div id="recentDonations" class="activity-list"></div>
+          </article>
+          <article class="panel pulse-card">
+            <div class="panel-head">
+              <h3>Open field queue</h3>
+              <span id="reportCountChip" class="stat-chip">0 cases</span>
+            </div>
+            <div id="recentReports" class="activity-list"></div>
+          </article>
+          <article class="panel pulse-card">
+            <div class="panel-head">
+              <h3>Volunteer momentum</h3>
+              <span id="volunteerCountChip" class="stat-chip">0 people</span>
+            </div>
+            <div id="recentVolunteers" class="activity-list"></div>
+          </article>
+        </div>
+      </section>
+
       <section id="donate" class="workspace">
         <div class="section-heading">
           <p class="eyebrow">Donation desk</p>
@@ -95,10 +126,10 @@
               <input id="donorContact" name="donorContact" type="text" placeholder="Optional receipt contact" />
             </label>
             <div class="amount-row" aria-label="Suggested donation amounts">
-              <button type="button" data-amount="250">₹250</button>
-              <button type="button" data-amount="500" class="selected">₹500</button>
-              <button type="button" data-amount="1000">₹1,000</button>
-              <button type="button" data-amount="2500">₹2,500</button>
+              <button type="button" data-amount="250">Rs 250</button>
+              <button type="button" data-amount="500" class="selected">Rs 500</button>
+              <button type="button" data-amount="1000">Rs 1,000</button>
+              <button type="button" data-amount="2500">Rs 2,500</button>
             </div>
             <label>
               Custom amount
@@ -117,19 +148,19 @@
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 3 6v6c0 5 3.8 8.8 9 10 5.2-1.2 9-5 9-10V6l-9-4Zm-1 14-3.3-3.3 1.4-1.4 1.9 1.9 4.9-4.9 1.4 1.4L11 16Z"/></svg>
               Continue to donation
             </button>
-            <p class="form-note">Start the Node server to save data centrally. Add Razorpay keys to collect real online payments.</p>
+            <p class="form-note">Pledges are saved instantly. Add payment credentials later when you are ready to accept live online payments.</p>
           </form>
 
           <aside class="panel impact-card">
             <div class="impact-top">
               <span>Estimated use</span>
-              <strong id="impactAmount">₹500</strong>
+              <strong id="impactAmount">Rs 500</strong>
             </div>
             <div class="allocation">
-              <div><span style="--w: 40%"></span><b>Food and water</b><em id="foodValue">₹200</em></div>
-              <div><span style="--w: 25%"></span><b>Medical care</b><em id="medicalValue">₹125</em></div>
-              <div><span style="--w: 25%"></span><b>Cleanup drives</b><em id="cleanValue">₹125</em></div>
-              <div><span style="--w: 10%"></span><b>Admin and transport</b><em id="adminValue">₹50</em></div>
+              <div><span style="--w: 40%"></span><b>Food and water</b><em id="foodValue">Rs 200</em></div>
+              <div><span style="--w: 25%"></span><b>Medical care</b><em id="medicalValue">Rs 125</em></div>
+              <div><span style="--w: 25%"></span><b>Cleanup drives</b><em id="cleanValue">Rs 125</em></div>
+              <div><span style="--w: 10%"></span><b>Admin and transport</b><em id="adminValue">Rs 50</em></div>
             </div>
             <div class="receipt" id="receiptBox">
               <h3>Ready for a pledge</h3>
@@ -179,7 +210,7 @@
           <div class="panel">
             <div class="list-head">
               <h3>Mission board</h3>
-              <button class="icon-button" id="clearReports" type="button" title="Clear local reports" aria-label="Clear local reports">
+              <button class="icon-button" id="clearReports" type="button" title="Clear reports" aria-label="Clear reports">
                 <svg viewBox="0 0 24 24"><path d="M7 21a2 2 0 0 1-2-2V8h14v11a2 2 0 0 1-2 2H7ZM8 5V3h8v2h4v2H4V5h4Z"/></svg>
               </button>
             </div>
@@ -191,10 +222,10 @@
       <section id="impact" class="impact-section">
         <div class="section-heading">
           <p class="eyebrow">Impact tracker</p>
-          <h2>Make the NGO’s work easy to understand.</h2>
+          <h2>Make the NGO's work easy to understand.</h2>
         </div>
         <div class="metric-grid">
-          <div class="metric"><span id="totalFunds">₹0</span><p>Total local pledges</p></div>
+          <div class="metric"><span id="totalFunds">Rs 0</span><p>Total pledges</p></div>
           <div class="metric"><span id="totalMeals">0</span><p>Animal meals estimated</p></div>
           <div class="metric"><span id="totalCleanups">0</span><p>Cleanup kits funded</p></div>
           <div class="metric"><span id="totalCare">0</span><p>Medical-care shares</p></div>
@@ -239,6 +270,6 @@
     </footer>
 
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-    <script src="/script.js?v=20260422a"></script>
+    <script src="/script.js?v=20260423a"></script>
   </body>
 </html>

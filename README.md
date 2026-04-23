@@ -36,6 +36,26 @@ npm start
 
 The app creates the required tables automatically on startup.
 
+## Admin Dashboard
+
+The app now includes a restricted admin dashboard at `/admin`.
+
+Add these values in `.env`:
+
+```bash
+ADMIN_EMAIL=admin@pawclean.city
+ADMIN_PASSWORD=choose_a_strong_password
+ADMIN_SESSION_SECRET=choose_a_long_random_secret
+```
+
+Then open:
+
+```text
+http://localhost:3000/admin
+```
+
+If you do not set `ADMIN_PASSWORD`, the app falls back to a local default for development only. Change it before deploying.
+
 ## Real Payment Setup
 
 Copy `.env.example` to `.env` and add real Razorpay credentials:
@@ -64,8 +84,10 @@ If you are not using PostgreSQL on Render yet, add a persistent disk and set `DA
 ## Files
 
 - `index.html` - app layout and forms
+- `admin.html` - restricted admin dashboard
 - `styles.css` - responsive visual design
-- `script.js` - API-aware frontend logic
+- `script.js` - public site frontend logic
+- `admin.js` - admin dashboard logic
 - `server.js` - Node backend, JSON database, Razorpay order and verification routes
 - `.env.example` - payment configuration template
 - `assets/hero-community-care.png` - generated hero image for the NGO

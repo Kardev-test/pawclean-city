@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PawClean City Admin</title>
+    <link rel="stylesheet" href="/styles.css?v=20260423a" />
+  </head>
+  <body class="admin-body">
+    <main class="admin-shell">
+      <section id="adminLoginView" class="admin-login">
+        <div class="admin-hero">
+          <p class="eyebrow">Restricted access</p>
+          <h1>Operations dashboard</h1>
+          <p>Track donations, reports, and volunteer momentum from one secure desk.</p>
+        </div>
+        <form id="adminLoginForm" class="panel admin-login-card">
+          <div class="panel-head">
+            <h2>Admin sign in</h2>
+            <span class="stat-chip">Protected</span>
+          </div>
+          <label>
+            Email
+            <input id="adminEmail" type="email" placeholder="admin@pawclean.city" required />
+          </label>
+          <label>
+            Password
+            <input id="adminPassword" type="password" placeholder="Enter admin password" required />
+          </label>
+          <button class="button primary full" type="submit">Open dashboard</button>
+          <p class="form-note" id="adminLoginMessage">Only authorized NGO operators should use this area.</p>
+        </form>
+      </section>
+
+      <section id="adminDashboardView" class="admin-dashboard hidden">
+        <header class="admin-topbar">
+          <div>
+            <p class="eyebrow">PawClean City</p>
+            <h1>Admin dashboard</h1>
+          </div>
+          <div class="admin-actions">
+            <a class="button secondary admin-link" href="/">Public site</a>
+            <button id="adminRefresh" class="button secondary" type="button">Refresh</button>
+            <button id="adminLogout" class="button primary" type="button">Logout</button>
+          </div>
+        </header>
+
+        <section class="admin-metrics">
+          <article class="metric admin-metric"><span id="adminFunds">Rs 0</span><p>Total pledges</p></article>
+          <article class="metric admin-metric"><span id="adminDonations">0</span><p>Donations logged</p></article>
+          <article class="metric admin-metric"><span id="adminOpenReports">0</span><p>Open reports</p></article>
+          <article class="metric admin-metric"><span id="adminVolunteerCount">0</span><p>Volunteers</p></article>
+        </section>
+
+        <section class="admin-layout">
+          <article class="panel admin-panel">
+            <div class="panel-head">
+              <h2>Program funding mix</h2>
+              <span class="stat-chip" id="adminFundingMixLabel">Live</span>
+            </div>
+            <div id="adminFundingMix" class="allocation admin-allocation"></div>
+          </article>
+
+          <article class="panel admin-panel">
+            <div class="panel-head">
+              <h2>Urgency queue</h2>
+              <span class="stat-chip" id="adminUrgencyLabel">Cases</span>
+            </div>
+            <div id="adminUrgencyQueue" class="admin-urgency-grid"></div>
+          </article>
+        </section>
+
+        <section class="admin-layout admin-lists">
+          <article class="panel admin-panel">
+            <div class="panel-head">
+              <h2>Recent donations</h2>
+              <span class="stat-chip" id="adminDonationStamp">Latest 8</span>
+            </div>
+            <div id="adminDonationList" class="activity-list"></div>
+          </article>
+
+          <article class="panel admin-panel">
+            <div class="panel-head">
+              <h2>Field queue</h2>
+              <span class="stat-chip" id="adminReportStamp">Action board</span>
+            </div>
+            <div id="adminReportList" class="activity-list"></div>
+          </article>
+
+          <article class="panel admin-panel">
+            <div class="panel-head">
+              <h2>Volunteers</h2>
+              <span class="stat-chip" id="adminVolunteerStamp">Latest 8</span>
+            </div>
+            <div id="adminVolunteerList" class="activity-list"></div>
+          </article>
+        </section>
+      </section>
+    </main>
+
+    <script src="/admin.js?v=20260423a"></script>
+  </body>
+</html>
