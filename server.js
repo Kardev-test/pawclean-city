@@ -222,6 +222,55 @@ async function saveVolunteer(volunteer) {
   return result.rows[0];
 }
 
+async function updateDonation(id, fields) {
+  if (!pool) {
+    const db = await readJsonDb();
+    const donation = db.donations.find((item) => item.id === id);
+    if (!donation) return null;
+    Object.assign(donation, fields);
+    await writeJsonDb(db);
+    return donation;
+  }
+
+  const result = await pool.query(
+    `
+      UPDATE donations
+      SET donor = $2, amount = $3, program = $4, contact = $5, status = $6
+      WHERE id = $1
+      RETURNING
+        id, donor, amount, program, contact, status,
+        payment_order_id AS "paymentOrderId",
+        payment_id AS "paymentId",
+        created_at AS "createdAt",
+        paid_at AS "paidAt"
+    `,
+    [id, fields.donor, fields.amount, fields.program, fields.contact, fields.status],
+  );
+  return result.rows[0] || null;
+}
+
+async function updateVolunteer(id, fields) {
+  if (!pool) {
+    const db = await readJsonDb();
+    const volunteer = db.volunteers.find((item) => item.id === id);
+    if (!volunteer) return null;
+    Object.assign(volunteer, fields);
+    await writeJsonDb(db);
+    return volunteer;
+  }
+
+  const result = await pool.query(
+    `
+      UPDATE volunteers
+      SET name = $2, area = $3, skill = $4
+      WHERE id = $1
+      RETURNING id, name, area, skill, created_at AS "createdAt"
+    `,
+    [id, fields.name, fields.area, fields.skill],
+  );
+  return result.rows[0] || null;
+}
+
 async function clearReports() {
   if (!pool) {
     const db = await readJsonDb();
@@ -231,6 +280,34 @@ async function clearReports() {
   }
 
   await pool.query("DELETE FROM reports");
+}
+
+async function deleteDonation(id) {
+  if (!pool) {
+    const db = await readJsonDb();
+    const index = db.donations.findIndex((item) => item.id === id);
+    if (index === -1) return false;
+    db.donations.splice(index, 1);
+    await writeJsonDb(db);
+    return true;
+  }
+
+  const result = await pool.query("DELETE FROM donations WHERE id = $1", [id]);
+  return result.rowCount > 0;
+}
+
+async function deleteVolunteer(id) {
+  if (!pool) {
+    const db = await readJsonDb();
+    const index = db.volunteers.findIndex((item) => item.id === id);
+    if (index === -1) return false;
+    db.volunteers.splice(index, 1);
+    await writeJsonDb(db);
+    return true;
+  }
+
+  const result = await pool.query("DELETE FROM volunteers WHERE id = $1", [id]);
+  return result.rowCount > 0;
 }
 
 async function markDonationPaidByOrder(orderId, paymentId) {
@@ -262,12 +339,12 @@ async function markDonationPaidByOrder(orderId, paymentId) {
   return result.rows[0] || null;
 }
 
-async function updateReportStatus(id, status) {
+async function updateReport(id, fields) {
   if (!pool) {
     const db = await readJsonDb();
     const report = db.reports.find((item) => item.id === id);
     if (!report) return null;
-    report.status = status;
+    Object.assign(report, fields);
     await writeJsonDb(db);
     return report;
   }
@@ -275,13 +352,27 @@ async function updateReportStatus(id, status) {
   const result = await pool.query(
     `
       UPDATE reports
-      SET status = $2
+      SET type = $2, location = $3, urgency = $4, notes = $5, status = $6
       WHERE id = $1
       RETURNING id, type, location, urgency, notes, status, created_at AS "createdAt"
     `,
-    [id, status],
+    [id, fields.type, fields.location, fields.urgency, fields.notes, fields.status],
   );
   return result.rows[0] || null;
+}
+
+async function deleteReport(id) {
+  if (!pool) {
+    const db = await readJsonDb();
+    const index = db.reports.findIndex((item) => item.id === id);
+    if (index === -1) return false;
+    db.reports.splice(index, 1);
+    await writeJsonDb(db);
+    return true;
+  }
+
+  const result = await pool.query("DELETE FROM reports WHERE id = $1", [id]);
+  return result.rowCount > 0;
 }
 
 function sendJson(res, status, data, headers = {}) {
@@ -663,14 +754,84 @@ async function handleApi(req, res, pathname) {
     const reportMatch = pathname.match(/^\/api\/admin\/reports\/([^/]+)$/);
     if (req.method === "PATCH" && reportMatch) {
       const body = await readBody(req);
-      const status = cleanString(body.status, 20);
-      if (!["open", "closed"].includes(status)) {
+      const nextStatus = cleanString(body.status, 20) || "open";
+      if (!["open", "closed"].includes(nextStatus)) {
         return sendJson(res, 400, { error: "Status must be open or closed." });
       }
-
-      const report = await updateReportStatus(reportMatch[1], status);
+      const type = cleanString(body.type, 80);
+      const location = cleanString(body.location, 160);
+      if (!type || !location) {
+        return sendJson(res, 400, { error: "Report type and location are required." });
+      }
+      const report = await updateReport(reportMatch[1], {
+        type,
+        location,
+        urgency: cleanString(body.urgency, 40) || "Normal",
+        notes: cleanString(body.notes, 700),
+        status: nextStatus,
+      });
       if (!report) return sendJson(res, 404, { error: "Report not found." });
       return sendJson(res, 200, { report });
+    }
+
+    if (req.method === "DELETE" && reportMatch) {
+      const deleted = await deleteReport(reportMatch[1]);
+      if (!deleted) return sendJson(res, 404, { error: "Report not found." });
+      return sendJson(res, 200, { ok: true });
+    }
+
+    const donationMatch = pathname.match(/^\/api\/admin\/donations\/([^/]+)$/);
+    if (req.method === "PATCH" && donationMatch) {
+      const body = await readBody(req);
+      const amount = Number(body.amount);
+      if (!Number.isFinite(amount) || amount < 0) {
+        return sendJson(res, 400, { error: "Donation amount must be a valid number." });
+      }
+      const donor = cleanString(body.donor, 120);
+      const program = cleanString(body.program, 80);
+      if (!donor || !program) {
+        return sendJson(res, 400, { error: "Donor and program are required." });
+      }
+
+      const donation = await updateDonation(donationMatch[1], {
+        donor,
+        amount: Math.round(amount),
+        program,
+        contact: cleanString(body.contact, 160),
+        status: cleanString(body.status, 40) || "pledged",
+      });
+      if (!donation) return sendJson(res, 404, { error: "Donation not found." });
+      return sendJson(res, 200, { donation });
+    }
+
+    if (req.method === "DELETE" && donationMatch) {
+      const deleted = await deleteDonation(donationMatch[1]);
+      if (!deleted) return sendJson(res, 404, { error: "Donation not found." });
+      return sendJson(res, 200, { ok: true });
+    }
+
+    const volunteerMatch = pathname.match(/^\/api\/admin\/volunteers\/([^/]+)$/);
+    if (req.method === "PATCH" && volunteerMatch) {
+      const body = await readBody(req);
+      const name = cleanString(body.name, 120);
+      const area = cleanString(body.area, 120);
+      const skill = cleanString(body.skill, 80);
+      if (!name || !area || !skill) {
+        return sendJson(res, 400, { error: "Volunteer name, area, and skill are required." });
+      }
+      const volunteer = await updateVolunteer(volunteerMatch[1], {
+        name,
+        area,
+        skill,
+      });
+      if (!volunteer) return sendJson(res, 404, { error: "Volunteer not found." });
+      return sendJson(res, 200, { volunteer });
+    }
+
+    if (req.method === "DELETE" && volunteerMatch) {
+      const deleted = await deleteVolunteer(volunteerMatch[1]);
+      if (!deleted) return sendJson(res, 404, { error: "Volunteer not found." });
+      return sendJson(res, 200, { ok: true });
     }
 
     return sendJson(res, 404, { error: "Not found" });

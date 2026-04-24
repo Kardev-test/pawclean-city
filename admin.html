@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>PawClean City Admin</title>
-    <link rel="stylesheet" href="/styles.css?v=20260423a" />
+    <link rel="stylesheet" href="/styles.css?v=20260424a" />
   </head>
   <body class="admin-body">
     <main class="admin-shell">
@@ -95,9 +95,31 @@
             <div id="adminVolunteerList" class="activity-list"></div>
           </article>
         </section>
+
+        <section class="admin-layout">
+          <article class="panel admin-panel admin-editor-panel">
+            <div class="panel-head">
+              <h2>Record editor</h2>
+              <span class="stat-chip" id="adminEditorStamp">Pick a record</span>
+            </div>
+            <form id="adminEditorForm" class="admin-editor-form hidden">
+              <div class="admin-editor-grid" id="adminEditorFields"></div>
+              <div class="admin-editor-actions">
+                <button class="button primary" id="adminEditorSave" type="submit">Save changes</button>
+                <button class="button secondary" id="adminEditorDelete" type="button">Delete record</button>
+                <button class="button secondary" id="adminEditorCancel" type="button">Cancel</button>
+              </div>
+            </form>
+            <div id="adminEditorEmpty" class="admin-editor-empty">
+              <strong>Nothing selected yet</strong>
+              <span>Use the edit buttons in the dashboard cards to update or remove records directly from the UI.</span>
+            </div>
+            <p class="form-note" id="adminEditorMessage">Changes here update the live database immediately.</p>
+          </article>
+        </section>
       </section>
     </main>
 
-    <script src="/admin.js?v=20260423a"></script>
+    <script src="/admin.js?v=20260424a"></script>
   </body>
 </html>
