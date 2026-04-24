@@ -105,6 +105,13 @@ svg {
   text-transform: uppercase;
 }
 
+.brand-copy em {
+  color: rgba(23, 33, 28, 0.58);
+  font-size: 0.72rem;
+  font-style: normal;
+  font-weight: 700;
+}
+
 .brand-mark {
   display: grid;
   place-items: center;
@@ -896,6 +903,30 @@ footer {
     radial-gradient(circle at top right, rgba(255, 212, 140, 0.18), transparent 26%);
 }
 
+.footer-brand,
+.footer-signature {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.footer-brand span {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.footer-signature {
+  text-align: right;
+}
+
+.footer-signature span {
+  color: rgba(255, 255, 255, 0.66);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+
+.footer-signature strong {
+  font-size: 1rem;
+}
+
 @media (max-width: 1080px) {
   .mission-grid,
   .metric-grid,
@@ -1001,5 +1032,9 @@ footer {
 
   footer {
     flex-direction: column;
+  }
+
+  .footer-signature {
+    text-align: left;
   }
 }
