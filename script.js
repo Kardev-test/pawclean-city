@@ -64,7 +64,6 @@ const recentReports = document.querySelector("#recentReports");
 const recentVolunteers = document.querySelector("#recentVolunteers");
 const heroSceneTitle = document.querySelector("#heroSceneTitle");
 const heroSceneText = document.querySelector("#heroSceneText");
-const signalTrack = document.querySelector("#signalTrack");
 
 const animatedCounters = new Map();
 
@@ -227,19 +226,6 @@ function renderPulse() {
   );
 }
 
-function renderSignalRibbon() {
-  const items = [
-    `${state.donations.length} donations logged`,
-    `${state.reports.filter((item) => item.status !== "closed").length} open field cases`,
-    `${state.volunteers.length} volunteers ready`,
-    `${rupee.format(state.donations.reduce((sum, item) => sum + Number(item.amount || 0), 0))} pledged`,
-    state.reports[0] ? `Latest alert: ${state.reports[0].type} in ${state.reports[0].location}` : "No active alert yet",
-    state.volunteers[0] ? `Latest volunteer: ${state.volunteers[0].name} joined ${state.volunteers[0].area}` : "Volunteer desk open",
-  ];
-  const repeated = [...items, ...items];
-  signalTrack.innerHTML = repeated.map((item) => `<span>${escapeHtml(item)}</span>`).join("");
-}
-
 function renderActivityItems(items, emptyMessage) {
   if (!items.length) return `<p class="empty">${escapeHtml(emptyMessage)}</p>`;
 
@@ -264,7 +250,6 @@ function renderAll() {
   renderReports();
   renderVolunteers();
   renderPulse();
-  renderSignalRibbon();
   updateTotals();
 }
 
